@@ -14,8 +14,6 @@ int dictionary_lookup_payload(unsigned char *payload, size_t plen, int *hit_num,
     pend = payload + plen - 1;
     pos = payload;
 
-    printf("payload:[%.*s]\n", plen, payload);
-
     while(pos < pend) {
         posw_s = posw_e = NULL;
 
@@ -40,7 +38,7 @@ int dictionary_lookup_payload(unsigned char *payload, size_t plen, int *hit_num,
             /* find start */
             j = 1;
             while(posw_s + j < pend) {
-                if (isspace(*(posw_s + j))) {
+                if (isspace(*(posw_s + j)) || *(posw_s + j) == ',' || *(posw_s + j) == '.') {
                     posw_e = posw_s + j;
                     break;
                 }
@@ -58,9 +56,9 @@ int dictionary_lookup_payload(unsigned char *payload, size_t plen, int *hit_num,
         }
         
         if (posw_s && wlen > 0) {
-            printf("parse word:[%.*s]\n", wlen, posw_s);
+            int hit = 0;
             (*word_num)++;
-            if (dictionary_lookup(posw_s, wlen)) {
+            if ((hit = dictionary_lookup(posw_s, wlen))) {
                 (*hit_num)++;
             }
         }
@@ -71,56 +69,46 @@ int dictionary_lookup_payload(unsigned char *payload, size_t plen, int *hit_num,
     return 0;
 }
 
-
-#if 0
-int main(int argc, char ** argv)
+static char * textFileRead(char* filename, int *flen)
 {
-    char word[MAX_WORD_SIZE+1];
-    char answer[MAX_DESC_SIZE+1];
+    char* text;
+    FILE *pf = fopen(filename,"r");
 
-    dictionary_initialise();
+    fseek(pf,0,SEEK_END);
+    long lSize = ftell(pf);
+    *flen = lSize;
+    text=(char*)malloc(lSize+1);
+    rewind(pf); 
+    fread(text,sizeof(char),lSize,pf);
+    text[lSize] = '\0';
 
-    int i;
-    for (i = 1; i < argc; i++)
-    {
-        dictionary_read_from_file(argv[i]);
-    }
-
-    scanf("%s",word);
-
-    while(word[0] != '.')
-    {
-        if (dictionary_lookup(word, strlen(word)))
-        {
-            printf("%s:\t%s\n", word, "Found!");
-        } else {
-            printf("%s:\t%s\n", word, "Not in dictionary");
-        }
-        scanf("%s",word);
-    }
+    return text;
 }
-#else
 
 int main(int argc, char ** argv)
 {
     char word[MAX_WORD_SIZE+1];
     char answer[MAX_DESC_SIZE+1];
 
-    dictionary_initialise();
-
-    int i;
-    for (i = 1; i < argc; i++)
-    {
-        dictionary_read_from_file(argv[i]);
+    if (argc < 2) {
+        fprintf(stderr, "usage: ./dictionary_run words_file dic_file\n");
+        return -1;
     }
+
+    char *dic_file = argv[2];
+    char *words_file = argv[1];
+
+    dictionary_initialise();
+    dictionary_read_from_file(dic_file);
+
+    int flen = 0;
+    char *payload = textFileRead(argv[1], &flen);
 
     int hit_num = 0, word_num = 0;
-    char payload[1024] =  "this is a test demo x 1122 3322 x3223";
 
-    dictionary_lookup_payload(payload, strlen(payload), &hit_num, &word_num);
+    dictionary_lookup_payload(payload, flen, &hit_num, &word_num);
 
     printf("hit_num:[%d] word_num:[%d]\n", hit_num, word_num);
 
 }
 
-#endif
