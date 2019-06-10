@@ -1,9 +1,8 @@
-/**
-* @author Michael Bull
-*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "dictionary.h"
 
 #define ALPHABET_SIZE 26
@@ -44,27 +43,6 @@ int letter_to_int(char letter)
 }
 
 /**
-* Prints and identifies an invalid character in a word
-* based upon its index within the word.
-*
-* e.g.
-*   word: "plat%eau"
-*              ^
-*/
-__attribute__((unused))
-void print_invalid_word(const char *word, int index)
-{
-    printf("  word: \"%s\"\n", word);
-    printf("         ");
-    int i;
-    for (i = 0; i < index; i++)
-    {
-        printf(" ");
-    }
-    printf("^\n");
-}
-
-/**
 * Inserts a word and its meaning into the trie.
 */
 int trie_insert(struct trie_node *node, const char *word, char *description)
@@ -75,10 +53,6 @@ int trie_insert(struct trie_node *node, const char *word, char *description)
         int letter = letter_to_int(word[i]);
         if (letter == -1)
         {
-            // invalid character in the string, cannot be inserted into the trie
-            printf("failed to insert due to invalid character in word\n");
-            //print_invalid_word(word, i);
-            printf("  description: \"%s\"\n", description);
             return false;
         }
 
@@ -140,7 +114,6 @@ int dictionary_read_from_file(const char * filename)
 
     if (!file)
     {
-        printf("could not find/open file \"%s\"\n", filename);
         return false;
     }
 
@@ -166,7 +139,6 @@ int dictionary_read_from_file(const char * filename)
     }
 
     fclose(file);
-    printf("parsed file \"%s\" with %i entries\n", filename, count);
     return true;
 }
 
@@ -179,8 +151,6 @@ int dictionary_lookup(const char *word, int wlen)
         int letter = letter_to_int(word[i]);
         if (letter == -1)
         {
-            printf("invalid character in word\n");
-            //print_invalid_word(word, i);
             return false;
         }
     }
