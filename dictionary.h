@@ -15,6 +15,6 @@ void dictionary_initialise();
 
 int dictionary_read_from_file(const char * filename);
 
-int dictionary_lookup(const char * word, char * meaning);
+int dictionary_lookup(const char * word);
 
 #endif

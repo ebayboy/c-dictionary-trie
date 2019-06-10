@@ -15,8 +15,6 @@ struct trie tree;
 
 struct trie_node
 {
-    char *value;
-
     // *2 as we must account for a-z as well as A-Z
     struct trie_node *children[ALPHABET_SIZE * 2];
 };
@@ -66,7 +64,7 @@ void print_invalid_word(const char *word, int index)
 /**
 * Inserts a word and its meaning into the trie.
 */
-int trie_insert(struct trie_node *node, const char *word, char *description)
+int trie_insert(struct trie_node *node, const char *word)
 {
     int i;
     for (i = 0; i < strlen(word); i++)
@@ -77,7 +75,6 @@ int trie_insert(struct trie_node *node, const char *word, char *description)
             // invalid character in the string, cannot be inserted into the trie
             printf("failed to insert due to invalid character in word\n");
             print_invalid_word(word, i);
-            printf("  description: \"%s\"\n", description);
             return false;
         }
 
@@ -91,14 +88,6 @@ int trie_insert(struct trie_node *node, const char *word, char *description)
         }
     }
 
-    /*
-    * this will prove very efficient we are only allocating enough memory
-    * for every character in the description, which will save a lot of space
-    * that would otherwise be allocated to the full MAX_DESC_SIZE
-    */
-    int len = strlen(description);
-    node->value = malloc(len + 1);
-    strncpy(node->value, description, len);
     return true;
 }
 
@@ -107,7 +96,7 @@ int trie_insert(struct trie_node *node, const char *word, char *description)
 * for a word's description based on the individual letters
 * that make up the word.
 */
-char *trie_get(struct trie_node *node, const char *word)
+int trie_get(struct trie_node *node, const char *word)
 {
     int i;
     for (i = 0; i < strlen(word); i++)
@@ -124,7 +113,8 @@ char *trie_get(struct trie_node *node, const char *word)
             return false; // not found
         }
     }
-    return node->value;
+
+    return true;
 }
 
 void dictionary_initialise()
@@ -144,14 +134,13 @@ int dictionary_read_from_file(const char * filename)
     }
 
     char word[MAX_WORD_SIZE];
-    char desc[MAX_DESC_SIZE];
 
     int count = 0;
 
-    // ensure that at least two items are being parsed (word & desc)
-    while (fscanf(file, "%s %[^\n]", word, desc) > 1)
-    {
-        if (!trie_insert(&tree.root, word, desc))
+    while (fscanf(file, "%s", word) > 0) {
+        printf("word:[%s]\n", word);
+
+        if (!trie_insert(&tree.root, word))
         {
             fclose(file);
             return false;
@@ -167,7 +156,7 @@ int dictionary_read_from_file(const char * filename)
     return true;
 }
 
-int dictionary_lookup(const char *word, char *meaning)
+int dictionary_lookup(const char *word)
 {
     // check for invalid letters in input
     int i;
@@ -181,17 +170,6 @@ int dictionary_lookup(const char *word, char *meaning)
             return false;
         }
     }
-
-    // grab the description from the tree
-    char *description = trie_get(&tree.root, word);
-
-    if (!description)
-    {
-        return false;
-    }
-
-    // copy the description into the user supplied buffer
-    strcpy(meaning, description);
 
     return true;
 }
