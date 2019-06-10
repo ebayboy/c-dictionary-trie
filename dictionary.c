@@ -51,6 +51,7 @@ int letter_to_int(char letter)
 *   word: "plat%eau"
 *              ^
 */
+__attribute__((unused))
 void print_invalid_word(const char *word, int index)
 {
     printf("  word: \"%s\"\n", word);
@@ -76,7 +77,7 @@ int trie_insert(struct trie_node *node, const char *word, char *description)
         {
             // invalid character in the string, cannot be inserted into the trie
             printf("failed to insert due to invalid character in word\n");
-            print_invalid_word(word, i);
+            //print_invalid_word(word, i);
             printf("  description: \"%s\"\n", description);
             return false;
         }
@@ -107,10 +108,10 @@ int trie_insert(struct trie_node *node, const char *word, char *description)
 * for a word's description based on the individual letters
 * that make up the word.
 */
-char *trie_get(struct trie_node *node, const char *word)
+char *trie_get(struct trie_node *node, const char *word, int wlen)
 {
     int i;
-    for (i = 0; i < strlen(word); i++)
+    for (i = 0; i < wlen; i++)
     {
         int letter = letter_to_int(word[i]);
         if (letter == -1)
@@ -169,31 +170,28 @@ int dictionary_read_from_file(const char * filename)
     return true;
 }
 
-int dictionary_lookup(const char *word, char *meaning)
+int dictionary_lookup(const char *word, int wlen)
 {
     // check for invalid letters in input
     int i;
-    for (i = 0; i < strlen(word); i++)
+    for (i = 0; i < wlen; i++)
     {
         int letter = letter_to_int(word[i]);
         if (letter == -1)
         {
             printf("invalid character in word\n");
-            print_invalid_word(word, i);
+            //print_invalid_word(word, i);
             return false;
         }
     }
 
     // grab the description from the tree
-    char *description = trie_get(&tree.root, word);
+    char *description = trie_get(&tree.root, word, wlen);
 
     if (!description)
     {
         return false;
     }
-
-    // copy the description into the user supplied buffer
-    strcpy(meaning, description);
 
     return true;
 }

@@ -3,6 +3,13 @@
 #include <string.h>
 #include "dictionary.h"
 
+
+int dictionary_lookup_payload(unsigned char *payload, int *hit_num, int *word_num)
+{
+
+    return 0;
+}
+
 int main(int argc, char ** argv)
 {
     char word[MAX_WORD_SIZE+1];
@@ -20,9 +27,9 @@ int main(int argc, char ** argv)
 
     while(word[0] != '.')
     {
-        if (dictionary_lookup(word,answer))
+        if (dictionary_lookup(word, strlen(word)))
         {
-            printf("%s:\t%s\n", word, answer);
+            printf("%s:\t%s\n", word, "Found!");
         } else {
             printf("%s:\t%s\n", word, "Not in dictionary");
         }
