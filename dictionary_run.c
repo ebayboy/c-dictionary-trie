@@ -20,9 +20,9 @@ int main(int argc, char ** argv)
 
     while(word[0] != '.')
     {
-        if (dictionary_lookup(word))
+        if (dictionary_lookup(word,answer))
         {
-            printf("lookup %s ok!\n", word);
+            printf("%s:\t%s\n", word, answer);
         } else {
             printf("%s:\t%s\n", word, "Not in dictionary");
         }
