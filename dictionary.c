@@ -165,3 +165,70 @@ int dictionary_lookup(const char *word, int wlen)
 
     return true;
 }
+
+int dictionary_lookup_payload(unsigned char *payload, size_t plen, int *hit_num, int *word_num)
+{
+    char *pos = NULL, *pend = NULL;
+    char *posw_s = NULL, *posw_e = NULL;
+    int wlen;
+    int i, j;
+
+    pend = payload + plen - 1;
+    pos = payload;
+
+    while(pos < pend) {
+        posw_s = posw_e = NULL;
+
+        if (posw_s == NULL) {
+            /* find start */
+            i = 0;
+            while(pos + i < pend) {
+                if (isspace(*(pos + i))) {
+                    i++;
+                    continue;
+                }
+                posw_s = pos + i;
+                break;
+            }
+        }
+
+        if (posw_s == NULL) {
+            break;
+        }
+
+        if (posw_e == NULL) {
+            /* find start */
+            j = 1;
+            while(posw_s + j < pend) {
+                if (isspace(*(posw_s + j)) || *(posw_s + j) == ',' || *(posw_s + j) == '.') {
+                    posw_e = posw_s + j;
+                    break;
+                }
+                j++;
+            }
+        }
+
+        if (posw_e == NULL) {
+            posw_e = pend;
+        }
+
+        wlen = posw_e - posw_s;
+        if (wlen == 0) {
+            wlen = 1;
+        }
+        
+        if (posw_s && wlen > 0) {
+            int hit = 0;
+            (*word_num)++;
+            if ((hit = dictionary_lookup(posw_s, wlen))) {
+                (*hit_num)++;
+            }
+        }
+
+        pos = posw_e + 1;
+    }
+
+    return 0;
+}
+
+
